@@ -217,12 +217,16 @@ sd.put(row25);
 We should now retrieve the data from GridDB and use it to fit a machine learning model. We will write a TQL query that selects and returns all the data stored in the `SalaryData` container:
 
 ```java
-Query<SalaryData> query = sd.query("select *");
-RowSet<SalaryData> rs = query.fetch(false);
-
-while (rs.hasNext()) {
+while(rs.hasNext()) {
 SalaryData sd1 = rs.next();
-double[][] data = {{sd1.yearsExperience},{sd1.salary}};
+x=sd1.yearsExperience;
+y=sd1.salary;
+
+
+System.out.println(x +" "+ y);
+double[][] d= {{x},{y}};
+data=d.clone();
+
 }
 ```
 
@@ -298,82 +302,17 @@ newDataset.add(inst);
 Classifier classifier = new weka.classifiers.functions.LinearRegression();
 
 classifier.buildClassifier(newDataset);
-        System.out.println(classifier);
 ```
 
 We now have a linear regression model. 
 
-## Evaluate and Test Model
-
-It is now time to evaluate the model using the training dataset. We will also test it using the test dataset. Let's define an array named `data2` and store the test data in it:
-
-```java
-    static double[][] data2 = {{9.0,9.5,9.6,10.3,10.5},{105582.00,116969.00,112635.00,112635.00,122391.00,121872.00}};
-```
-
-The data must be converted into Weka instances before feeding it into the model. We will store the attributes in a FastVector data structure and the instances in an ArrayList. Let us define them:
-
-```java
-int numInstances2 = data2[0].length;
-        FastVector atts2 = new FastVector();
-        List<Instance> instances2 = new ArrayList<Instance>();
-```
-
-Let us use a `for` loop to iterate over the data and store the attributes into the FastVector:
-
-```java
-for(int dim2 = 0; dim2 < 2; dim2++)
-    {
-        Attribute current2 = new Attribute("Attribute" + dim2, dim2);
-
-        if(dim2 == 0)
-        {
-            for(int obj2 = 0; obj2 < numInstances2; obj2++)
-            {
-                instances2.add(new SparseInstance(numInstances2));
-            }
-        }
-
-        for(int obj2 = 0; obj2 < numInstances2; obj2++)
-        {
-            instances2.get(obj2).setValue(current2, data2[dim2][obj2]);
-            
-        }
-        atts2.addElement(current2);
-    }
-```
-
-We should now create instances of the training dataset and populate them in an Instance variable named `newDataset2`:
-
-```java
-    Instances newDataset2 = new Instances("Dataset", atts2, instances2.size());
-```
-
-Let us specify the class attribute of the dataset before feeding it into the model:
-
-```java
-newDataset2.setClassIndex(1);
-```
-
-We can now feed the data into the model and show the evaluation summary:
-
-```java
-
-for(Instance inst2 : instances2)
-       newDataset2.add(inst2);
-        
-        Evaluation eval = new Evaluation(newDataset);
-		eval.evaluateModel(classifier, newDataset2);
-		
-		System.out.println(eval.toSummaryString());
-```
 
 ## Make a Prediction
 
-Let's use our linear regression model to predict the salary of a person based on their years of experience. We will use the last instance of the test dataset to make the prediction:
+Let's use our linear regression model to predict the salary of a person based on their years of experience. We will use the last instance of our dataset to make the prediction:
 
 ```java
-Instance pd = newDataset2.lastInstance();
+Instance pd = newDataset.lastInstance();
 double value = classifier.classifyInstance(pd);               	
 		System.out.println(value);
 ```
@@ -411,7 +350,7 @@ Run the generated .class file using the following command:
 java Salary
 ```
 
-The model returned a correlation coefficient of 0.7428. Correlation values range between -1 and 1, where 1 is very strong and linear correlation, -1 is inverse linear relation and 0 means no relation. The model also predicted a salary of 128755.55 for the person.   
+The model predicted a salary of 109431.0 for the person.   
 
 
 
