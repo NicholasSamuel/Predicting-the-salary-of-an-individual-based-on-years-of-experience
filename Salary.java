@@ -32,11 +32,8 @@ import weka.core.SparseInstance;
  * @author user
  */
 public class Salary {
-    static double[][] data = {{1.1,1.3,1.5,2.0,2.2,2.9,3.0,3.2,3.2,3.7,3.9,4.0,4.0,4.1,4.5,4.9,5.1,5.3,5.9,6.0,6.8,7.1,7.9,8.2,8.7},
-       {39343.00,46205.00,37731.00,43525.00,39891.00,56642.00,60150.00,54445.00,64445.00,57189.00,63218.00,55794.00,56957.00,57081.00,61111.00,67938.00,
-       66029.00,83088.00,81363.00,93940.00,91738.00,98273.00,101302.00,113812.00,109431.00}};
-    static double[][] data2 = {{9.0,9.5,9.6,10.3,10.5},{105582.00,116969.00,112635.00,112635.00,122391.00,121872.00}};
-    
+   
+   
       static class SalaryData {
 	@RowKey int id;
         double yearsExperience;
@@ -186,8 +183,6 @@ row25.id=25;
 row25.yearsExperience=8.7;
 row25.salary=109431.00;
 
-
-
 Collection<String, SalaryData> sd= store.putCollection("SalaryData", SalaryData.class);
 sd.put(row1);
 sd.put(row2);
@@ -216,18 +211,30 @@ sd.put(row24);
 sd.put(row25);
 
 
+
+
 Query<SalaryData> query = sd.query("select *");
 RowSet<SalaryData> rs = query.fetch(false);
+double x=0;
+double y=0;
+double[][] data = {{x},{y}};
 
+System.out.println("Training dataset:");
 
-    
-while (rs.hasNext()) {
+while(rs.hasNext()) {
 SalaryData sd1 = rs.next();
-double[][] data = {{sd1.yearsExperience},{sd1.salary}};
+x=sd1.yearsExperience;
+y=sd1.salary;
+
+
+System.out.println(x +" "+ y);
+double[][] d= {{x},{y}};
+data=d.clone();
+
 }
+   
 
-
-       int numInstances = data[0].length;
+int numInstances = data[0].length;
                    FastVector atts = new FastVector();
                          
                    List<Instance> instances = new ArrayList<Instance>();
@@ -251,76 +258,41 @@ double[][] data = {{sd1.yearsExperience},{sd1.salary}};
         }
         atts.addElement(current);
     }
-                         
-Instances newDataset = new Instances("Dataset", atts, instances.size());
+         
+        
+
+
+    
+  
+    Instances newDataset = new Instances("Dataset", atts, instances.size());
         
 
 newDataset.setClassIndex(1);
 for(Instance inst : instances)
 newDataset.add(inst);
-Classifier classifier = new weka.classifiers.functions.LinearRegression();
 
-
-
-    
-
-        int numInstances2 = data2[0].length;
-        FastVector atts2 = new FastVector();
-        List<Instance> instances2 = new ArrayList<Instance>();
-
-
-    for(int dim2 = 0; dim2 < 2; dim2++)
-    {
-        Attribute current2 = new Attribute("Attribute" + dim2, dim2);
-
-        if(dim2 == 0)
-        {
-            for(int obj2 = 0; obj2 < numInstances2; obj2++)
-            {
-                instances2.add(new SparseInstance(numInstances2));
-            }
-        }
-
-        for(int obj2 = 0; obj2 < numInstances2; obj2++)
-        {
-            instances2.get(obj2).setValue(current2, data2[dim2][obj2]);
-            
-        }
-        atts2.addElement(current2);
-    }
-
-    Instances newDataset2 = new Instances("Dataset", atts2, instances2.size());
         
 
-newDataset2.setClassIndex(1);
 
-    for(Instance inst2 : instances2)
-       newDataset2.add(inst2);
-
-   
  
        try{
+Classifier classifier = new weka.classifiers.functions.LinearRegression();
+
 classifier.buildClassifier(newDataset);
-        System.out.println(classifier);
-        
-        Evaluation eval = new Evaluation(newDataset);
-		eval.evaluateModel(classifier, newDataset2);
-		
-		
-		System.out.println(eval.toSummaryString());
+         
                 
-                Instance pd = newDataset2.lastInstance();
+                Instance pd = newDataset.lastInstance();
                 double value = classifier.classifyInstance(pd);
                 
 		
-		System.out.println(value);
+		System.out.println("The predicted value is: "+ value);
         } catch (Exception ex) {
         Logger.getLogger(SalaryData.class.getName()).log(Level.SEVERE, null, ex);
     }
        
 		
-   
-    
+ 
+
   //}  close while
      
 }
